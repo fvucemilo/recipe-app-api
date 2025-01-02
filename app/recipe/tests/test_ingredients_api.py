@@ -21,9 +21,9 @@ def detail_url(ingredient_id):
     return reverse('recipe:ingredient-detail', args=[ingredient_id])
 
 
-def create_user(email='user@example.com', password='testpass123'):
-    """Create and return user."""
-    return get_user_model().objects.create_user(email=email, password=password)
+def create_user(**params):
+    """Create and return a new user."""
+    return get_user_model().objects.create_user(**params)
 
 
 class PublicIngredientAPITests(TestCase):
@@ -43,7 +43,10 @@ class PrivateIngredientAPITests(TestCase):
     """Test authenticated API requests."""
 
     def setUp(self):
-        self.user = create_user()
+        self.user = create_user(
+            email='user@example.com',
+            password='password123'
+        )
         self.client = APIClient()
         self.client.force_authenticate(self.user)
 
@@ -61,7 +64,7 @@ class PrivateIngredientAPITests(TestCase):
 
     def test_ingredients_limited_to_user(self):
         """Test list of ingredients is limited to authenticated user."""
-        user2 = create_user(email='user2@example.com')
+        user2 = create_user(email='user2@example.com', password='password123')
         Ingredient.objects.create(user=user2, name='Salt')
         ingredient = Ingredient.objects.create(user=self.user, name='Pepper')
 
